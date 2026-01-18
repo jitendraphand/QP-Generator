@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Question Paper Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #a5b4fc;
+            --secondary: #0ea5e9;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --error: #ef4444;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #475569;
+            --glow: rgba(99, 102, 241, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-dark);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Animated Background */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(14, 165, 233, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(245, 158, 11, 0.05) 0%, transparent 60%);
+            z-index: -1;
+            animation: gradientShift 15s ease infinite alternate;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px var(--glow);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .logo svg {
+            width: 45px;
+            height: 45px;
+            fill: white;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        /* Card */
+        .card {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 40px;
+            border: 1px solid var(--border);
+            box-shadow:
+                0 4px 6px -1px rgba(0, 0, 0, 0.2),
+                0 25px 50px -12px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Form Groups */
+        .form-section {
+            margin-bottom: 35px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-title svg {
+            width: 18px;
+            height: 18px;
+            fill: var(--primary-light);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-grid.three-col {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        @media (max-width: 640px) {
+
+            .form-grid,
+            .form-grid.three-col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        input,
+        select,
+        textarea {
+            padding: 14px 18px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--glow);
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6,9 12,15 18,9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 45px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Checkbox Group */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: var(--bg-input);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-group:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-group input[type="checkbox"]:checked {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .checkbox-group input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .checkbox-group label {
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        /* Question Types Grid */
+        .question-types-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .question-types-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .question-types-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .question-type-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .question-type-item:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .qt-icon {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .qt-icon.mcq {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .qt-icon.short {
+            background: rgba(14, 165, 233, 0.2);
+        }
+
+        .qt-icon.long {
+            background: rgba(16, 185, 129, 0.2);
+        }
+
+        .qt-icon.truefalse {
+            background: rgba(245, 158, 11, 0.2);
+        }
+
+        .qt-icon.fillblank {
+            background: rgba(239, 68, 68, 0.2);
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .qt-icon.casestudy {
+            background: rgba(168, 85, 247, 0.2);
+        }
+
+        /* Topics Section */
+        .topics-section {
+            margin-top: 20px;
+        }
+
+        .topics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .topics-header label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .add-topic-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-topic-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .add-topic-btn span {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .topic-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .topic-row .topic-input {
+            flex: 1;
+            padding: 14px 18px;
+        }
+
+        .weightage-container {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .weightage-input {
+            width: 70px;
+            padding: 14px 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .weightage-label {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .remove-topic-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            color: var(--error);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .remove-topic-btn:hover {
+            background: var(--error);
+            color: white;
+        }
+
+        .weightage-total {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary-light);
+        }
+
+        .weightage-total #totalWeightage {
+            font-size: 1.1rem;
+        }
+
+        .qt-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+        }
+
+        .qt-info label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .qt-info input {
+            width: 70px;
+            padding: 8px 12px;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .question-type-total {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .total-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 4px;
+        }
+
+        .total-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        /* Difficulty Mix */
+        .difficulty-mix {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            padding: 20px;
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 12px;
+            border: 1px dashed var(--border);
+        }
+
+        .difficulty-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .difficulty-item label {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .difficulty-item.easy label {
+            color: #10b981;
+        }
+
+        .difficulty-item.medium label {
+            color: #f59e0b;
+        }
+
+        .difficulty-item.hard label {
+            color: #ef4444;
+        }
+
+        .difficulty-item input {
+            width: 80px;
+            text-align: center;
+            padding: 10px;
+        }
+
+        /* Toggle Switch */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toggle {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            background: var(--bg-input);
+            border-radius: 13px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle.active {
+            background: var(--primary);
+        }
+
+        .toggle.active::after {
+            left: 27px;
+            background: white;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 18px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px var(--glow);
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--glow);
+        }
+
+        .submit-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .submit-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Result Card */
+        .result-card {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 16px;
+            animation: slideUp 0.5s ease;
+            display: none;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-card.success {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            display: block;
+        }
+
+        .result-card.error {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            display: block;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .result-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-icon.success {
+            background: rgba(16, 185, 129, 0.2);
+        }
+
+        .result-icon.error {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .result-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .result-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .result-title.success {
+            color: var(--success);
+        }
+
+        .result-title.error {
+            color: var(--error);
+        }
+
+        .result-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .result-item {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        .result-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .result-value {
+            color: var(--text-primary);
+            font-weight: 500;
+            word-break: break-all;
+        }
+
+        .result-value a {
+            color: var(--primary-light);
+            text-decoration: none;
+        }
+
+        .result-value a:hover {
+            text-decoration: underline;
+        }
+
+        /* Webhook URL Input */
+        .webhook-config {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .webhook-config label {
+            color: var(--accent);
+        }
+
+        .webhook-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer a {
+            color: var(--primary-light);
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-gradient"></div>
+
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+                </svg>
+            </div>
+            <h1>AI Question Paper Generator</h1>
+            <p class="subtitle">Create professional exam papers powered by AI</p>
+        </header>
+
+        <div class="card">
+            <form id="questionPaperForm">
+
+                <!-- Institution Details -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z" />
+                        </svg>
+                        Institution Details
+                    </h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="institution">Institution Name</label>
+                            <input type="text" id="institution" name="institution" placeholder="ABC High School">
+                        </div>
+                        <div class="form-group">
+                            <label for="academicYear">Academic Year</label>
+                            <input type="text" id="academicYear" name="academicYear" placeholder="2025-2026">
+                        </div>
+                        <div class="form-group">
+                            <label for="examinerName">Examiner Name</label>
+                            <input type="text" id="examinerName" name="examinerName" placeholder="Mr. John Smith">
+                        </div>
+                        <div class="form-group">
+                            <label for="examType">Exam Type</label>
+                            <select id="examType" name="examType">
+                                <option value="Unit Test">Unit Test</option>
+                                <option value="Quiz">Quiz</option>
+                                <option value="Mid-term Examination">Mid-term Examination</option>
+                                <option value="Final Examination">Final Examination</option>
+                                <option value="Practice Test">Practice Test</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subject Details -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z" />
+                        </svg>
+                        Subject Details
+                    </h3>
+                    <div class="form-grid three-col">
+                        <div class="form-group">
+                            <label for="subject">Subject *</label>
+                            <input type="text" id="subject" name="subject" placeholder="Mathematics" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="grade">Grade / Class *</label>
+                            <select id="grade" name="grade" required>
+                                <option value="Grade 1">Grade 1</option>
+                                <option value="Grade 2">Grade 2</option>
+                                <option value="Grade 3">Grade 3</option>
+                                <option value="Grade 4">Grade 4</option>
+                                <option value="Grade 5">Grade 5</option>
+                                <option value="Grade 6">Grade 6</option>
+                                <option value="Grade 7">Grade 7</option>
+                                <option value="Grade 8">Grade 8</option>
+                                <option value="Grade 9">Grade 9</option>
+                                <option value="Grade 10" selected>Grade 10</option>
+                                <option value="Grade 11">Grade 11</option>
+                                <option value="Grade 12">Grade 12</option>
+                                <option value="Undergraduate">Undergraduate</option>
+                                <option value="Postgraduate">Postgraduate</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="section">Section</label>
+                            <input type="text" id="section" name="section" placeholder="A">
+                        </div>
+                    </div>
+
+                    <!-- Topics/Chapters Section -->
+                    <div class="topics-section">
+                        <div class="topics-header">
+                            <label>Topics / Chapters</label>
+                            <button type="button" class="add-topic-btn" id="addTopicBtn">
+                                <span>+</span> Add Topic
+                            </button>
+                        </div>
+                        <div id="topicsContainer">
+                            <div class="topic-row" data-index="0">
+                                <input type="text" class="topic-input" placeholder="e.g., Quadratic Equations" value="">
+                                <div class="weightage-container" style="display: none;">
+                                    <input type="number" class="weightage-input" value="100" min="0" max="100">
+                                    <span class="weightage-label">%</span>
+                                </div>
+                                <button type="button" class="remove-topic-btn" style="display: none;">×</button>
+                            </div>
+                        </div>
+                        <div class="weightage-total" id="weightageTotalRow" style="display: none;">
+                            <span>Total Weightage:</span>
+                            <span id="totalWeightage">100</span>%
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question Configuration -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z" />
+                        </svg>
+                        Question Configuration
+                    </h3>
+
+                    <!-- Question Types with Count -->
+                    <div class="question-types-grid">
+                        <div class="question-type-item">
+                            <div class="qt-icon mcq">📝</div>
+                            <div class="qt-info">
+                                <label for="mcqCount">Multiple Choice (MCQ)</label>
+                                <input type="number" id="mcqCount" name="mcqCount" value="3" min="0" max="20">
+                            </div>
+                        </div>
+                        <div class="question-type-item">
+                            <div class="qt-icon short">✏️</div>
+                            <div class="qt-info">
+                                <label for="shortAnswerCount">Short Answer</label>
+                                <input type="number" id="shortAnswerCount" name="shortAnswerCount" value="3" min="0"
+                                    max="20">
+                            </div>
+                        </div>
+                        <div class="question-type-item">
+                            <div class="qt-icon long">📄</div>
+                            <div class="qt-info">
+                                <label for="longAnswerCount">Long Answer</label>
+                                <input type="number" id="longAnswerCount" name="longAnswerCount" value="2" min="0"
+                                    max="20">
+                            </div>
+                        </div>
+                        <div class="question-type-item">
+                            <div class="qt-icon truefalse">✓✗</div>
+                            <div class="qt-info">
+                                <label for="trueFalseCount">True / False</label>
+                                <input type="number" id="trueFalseCount" name="trueFalseCount" value="2" min="0"
+                                    max="20">
+                            </div>
+                        </div>
+                        <div class="question-type-item">
+                            <div class="qt-icon fillblank">___</div>
+                            <div class="qt-info">
+                                <label for="fillBlankCount">Fill in the Blank</label>
+                                <input type="number" id="fillBlankCount" name="fillBlankCount" value="0" min="0"
+                                    max="20">
+                            </div>
+                        </div>
+                        <div class="question-type-item">
+                            <div class="qt-icon casestudy">📊</div>
+                            <div class="qt-info">
+                                <label for="caseStudyCount">Case Study Based</label>
+                                <input type="number" id="caseStudyCount" name="caseStudyCount" value="0" min="0"
+                                    max="10">
+                            </div>
+                        </div>
+                        <div class="question-type-total">
+                            <div class="total-label">Total Questions</div>
+                            <div class="total-value" id="totalQuestionsDisplay">10</div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="margin-top: 20px;">
+                        <div class="form-group">
+                            <label for="difficulty">Difficulty Level</label>
+                            <select id="difficulty" name="difficulty">
+                                <option value="Easy">Easy</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="Hard">Hard</option>
+                                <option value="Mixed">Mixed (Custom %)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Difficulty Mix (hidden by default) -->
+                    <div class="difficulty-mix" id="difficultyMixSection" style="display: none; margin-top: 20px;">
+                        <div class="difficulty-item easy">
+                            <label>🟢 Easy %</label>
+                            <input type="number" id="easyPercent" value="30" min="0" max="100">
+                        </div>
+                        <div class="difficulty-item medium">
+                            <label>🟡 Medium %</label>
+                            <input type="number" id="mediumPercent" value="50" min="0" max="100">
+                        </div>
+                        <div class="difficulty-item hard">
+                            <label>🔴 Hard %</label>
+                            <input type="number" id="hardPercent" value="20" min="0" max="100">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Options -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
+                        </svg>
+                        Additional Options
+                    </h3>
+                    <div class="form-grid">
+                        <div class="checkbox-group" onclick="toggleCheckbox('includeAnswers')">
+                            <input type="checkbox" id="includeAnswers" name="includeAnswers">
+                            <label for="includeAnswers">Include Answer Key with Explanations</label>
+                        </div>
+                    </div>
+                    <div class="form-group full-width" style="margin-top: 20px;">
+                        <label for="requirements">Additional Requirements / Instructions</label>
+                        <textarea id="requirements" name="requirements"
+                            placeholder="E.g., Include word problems, focus on real-world applications, include diagrams..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z" />
+                    </svg>
+                    Generate Question Paper
+                </button>
+            </form>
+
+            <!-- Result Section -->
+            <div id="resultCard" class="result-card"></div>
+        </div>
+
+        <footer class="footer">
+            <p>Powered by n8n & OpenAI GPT-4o</p>
+        </footer>
+    </div>
+
+    <script>
+        // ========================================
+        // CONFIGURE YOUR WEBHOOK URL HERE
+        // ========================================
+        const WEBHOOK_URL = 'https://gurukulolympiad.app.n8n.cloud/webhook/generate-question-paper';
+        // ========================================
+
+        // Toggle difficulty mix visibility
+        document.getElementById('difficulty').addEventListener('change', function () {
+            const mixSection = document.getElementById('difficultyMixSection');
+            mixSection.style.display = this.value === 'Mixed' ? 'grid' : 'none';
+        });
+
+        // Checkbox toggle helper
+        function toggleCheckbox(id) {
+            const checkbox = document.getElementById(id);
+            checkbox.checked = !checkbox.checked;
+        }
+
+        // Calculate total questions
+        function updateTotalQuestions() {
+            const mcq = parseInt(document.getElementById('mcqCount').value) || 0;
+            const short = parseInt(document.getElementById('shortAnswerCount').value) || 0;
+            const long = parseInt(document.getElementById('longAnswerCount').value) || 0;
+            const trueFalse = parseInt(document.getElementById('trueFalseCount').value) || 0;
+            const fillBlank = parseInt(document.getElementById('fillBlankCount').value) || 0;
+            const caseStudy = parseInt(document.getElementById('caseStudyCount').value) || 0;
+            const total = mcq + short + long + trueFalse + fillBlank + caseStudy;
+            document.getElementById('totalQuestionsDisplay').textContent = total;
+            return total;
+        }
+
+        // Add listeners to all question type inputs
+        ['mcqCount', 'shortAnswerCount', 'longAnswerCount', 'trueFalseCount', 'fillBlankCount', 'caseStudyCount'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updateTotalQuestions);
+        });
+
+        // ========================================
+        // TOPICS MANAGEMENT
+        // ========================================
+        let topicIndex = 1;
+
+        function updateTopicsUI() {
+            const container = document.getElementById('topicsContainer');
+            const rows = container.querySelectorAll('.topic-row');
+            const count = rows.length;
+            const showWeightage = count > 1;
+
+            rows.forEach(row => {
+                const weightageContainer = row.querySelector('.weightage-container');
+                const removeBtn = row.querySelector('.remove-topic-btn');
+
+                weightageContainer.style.display = showWeightage ? 'flex' : 'none';
+                removeBtn.style.display = showWeightage ? 'flex' : 'none';
+            });
+
+            document.getElementById('weightageTotalRow').style.display = showWeightage ? 'flex' : 'none';
+            updateWeightageTotal();
+        }
+
+        function updateWeightageTotal() {
+            const inputs = document.querySelectorAll('.weightage-input');
+            let total = 0;
+            inputs.forEach(input => {
+                total += parseInt(input.value) || 0;
+            });
+            const display = document.getElementById('totalWeightage');
+            display.textContent = total;
+            display.style.color = total === 100 ? '#10b981' : '#ef4444';
+        }
+
+        function addTopic() {
+            const container = document.getElementById('topicsContainer');
+            const newRow = document.createElement('div');
+            newRow.className = 'topic-row';
+            newRow.dataset.index = topicIndex++;
+            newRow.innerHTML = `
+                <input type="text" class="topic-input" placeholder="e.g., Linear Equations" value="">
+                <div class="weightage-container">
+                    <input type="number" class="weightage-input" value="0" min="0" max="100">
+                    <span class="weightage-label">%</span>
+                </div>
+                <button type="button" class="remove-topic-btn">×</button>
+            `;
+
+            container.appendChild(newRow);
+
+            // Add event listeners
+            newRow.querySelector('.remove-topic-btn').addEventListener('click', () => removeTopic(newRow));
+            newRow.querySelector('.weightage-input').addEventListener('input', updateWeightageTotal);
+
+            updateTopicsUI();
+        }
+
+        function removeTopic(row) {
+            row.remove();
+            updateTopicsUI();
+        }
+
+        // Initialize topic event listeners
+        document.getElementById('addTopicBtn').addEventListener('click', addTopic);
+        document.querySelector('.topic-row .remove-topic-btn').addEventListener('click', function () {
+            removeTopic(this.closest('.topic-row'));
+        });
+        document.querySelector('.weightage-input').addEventListener('input', updateWeightageTotal);
+
+        // Get all topics with weightage
+        function getTopics() {
+            const rows = document.querySelectorAll('.topic-row');
+            const topics = [];
+            rows.forEach(row => {
+                const topic = row.querySelector('.topic-input').value.trim();
+                const weightage = parseInt(row.querySelector('.weightage-input').value) || 0;
+                if (topic) {
+                    topics.push({ topic, weightage });
+                }
+            });
+            return topics;
+        }
+
+        // Form submission
+        document.getElementById('questionPaperForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const resultCard = document.getElementById('resultCard');
+
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="spinner"></div> Generating...';
+            resultCard.className = 'result-card';
+            resultCard.style.display = 'none';
+
+            // Build question types breakdown
+            const questionTypeBreakdown = {
+                mcq: parseInt(document.getElementById('mcqCount').value) || 0,
+                shortAnswer: parseInt(document.getElementById('shortAnswerCount').value) || 0,
+                longAnswer: parseInt(document.getElementById('longAnswerCount').value) || 0,
+                trueFalse: parseInt(document.getElementById('trueFalseCount').value) || 0,
+                fillBlank: parseInt(document.getElementById('fillBlankCount').value) || 0,
+                caseStudy: parseInt(document.getElementById('caseStudyCount').value) || 0
+            };
+
+            // Build question types string for AI prompt
+            const questionTypesArray = [];
+            if (questionTypeBreakdown.mcq > 0) questionTypesArray.push(`${questionTypeBreakdown.mcq} MCQ`);
+            if (questionTypeBreakdown.shortAnswer > 0) questionTypesArray.push(`${questionTypeBreakdown.shortAnswer} Short Answer`);
+            if (questionTypeBreakdown.longAnswer > 0) questionTypesArray.push(`${questionTypeBreakdown.longAnswer} Long Answer`);
+            if (questionTypeBreakdown.trueFalse > 0) questionTypesArray.push(`${questionTypeBreakdown.trueFalse} True/False`);
+            if (questionTypeBreakdown.fillBlank > 0) questionTypesArray.push(`${questionTypeBreakdown.fillBlank} Fill in the Blank`);
+            if (questionTypeBreakdown.caseStudy > 0) questionTypesArray.push(`${questionTypeBreakdown.caseStudy} Case Study Based`);
+
+            // Get topics with weightage
+            const topics = getTopics();
+            const topicString = topics.length > 1
+                ? topics.map(t => `${t.topic} (${t.weightage}%)`).join(', ')
+                : topics[0]?.topic || '';
+
+            // Build payload
+            const payload = {
+                subject: document.getElementById('subject').value,
+                grade: document.getElementById('grade').value,
+                topics: topics,
+                topic: topicString,
+                questionCount: updateTotalQuestions(),
+                questionTypeBreakdown: questionTypeBreakdown,
+                questionTypes: questionTypesArray.join(', '),
+                difficulty: document.getElementById('difficulty').value,
+                includeAnswers: document.getElementById('includeAnswers').checked,
+                requirements: document.getElementById('requirements').value,
+                examType: document.getElementById('examType').value,
+                institution: document.getElementById('institution').value,
+                examinerName: document.getElementById('examinerName').value,
+                academicYear: document.getElementById('academicYear').value,
+                section: document.getElementById('section').value
+            };
+
+            // Add difficulty mix if selected
+            if (document.getElementById('difficulty').value === 'Mixed') {
+                payload.difficultyMix = {
+                    Easy: parseInt(document.getElementById('easyPercent').value),
+                    Medium: parseInt(document.getElementById('mediumPercent').value),
+                    Hard: parseInt(document.getElementById('hardPercent').value)
+                };
+            }
+
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    resultCard.className = 'result-card success';
+                    resultCard.innerHTML = `
+                        <div class="result-header">
+                            <div class="result-icon success">
+                                <svg fill="#10b981" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                            </div>
+                            <div class="result-title success">Question Paper Generated!</div>
+                        </div>
+                        <div class="result-details">
+                            <div class="result-item">
+                                <div class="result-label">File Name</div>
+                                <div class="result-value">${data.data?.fileName || 'N/A'}</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Total Marks</div>
+                                <div class="result-value">${data.statistics?.totalMarks || 'N/A'}</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Duration</div>
+                                <div class="result-value">${data.statistics?.duration || 'N/A'}</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">Generated At</div>
+                                <div class="result-value">${new Date(data.generatedAt).toLocaleString() || 'N/A'}</div>
+                            </div>
+                            ${data.data?.googleDriveUrl ? `
+                            <div class="result-item" style="grid-column: 1 / -1;">
+                                <div class="result-label">Google Drive Link</div>
+                                <div class="result-value"><a href="${data.data.googleDriveUrl}" target="_blank">📄 Open in Google Drive</a></div>
+                            </div>` : ''}
+                            ${data.data?.downloadUrl ? `
+                            <div class="result-item" style="grid-column: 1 / -1;">
+                                <div class="result-label">Download Link</div>
+                                <div class="result-value"><a href="${data.data.downloadUrl}" target="_blank">⬇️ Download Question Paper</a></div>
+                            </div>` : ''}
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.error || data.message || 'Failed to generate question paper');
+                }
+            } catch (error) {
+                resultCard.className = 'result-card error';
+                resultCard.innerHTML = `
+                    <div class="result-header">
+                        <div class="result-icon error">
+                            <svg fill="#ef4444" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                        </div>
+                        <div class="result-title error">Generation Failed</div>
+                    </div>
+                    <div class="result-details">
+                        <div class="result-item" style="grid-column: 1 / -1;">
+                            <div class="result-label">Error</div>
+                            <div class="result-value">${error.message}</div>
+                        </div>
+                        <div class="result-item" style="grid-column: 1 / -1;">
+                            <div class="result-label">Troubleshooting</div>
+                            <div class="result-value">
+                                1. Check that your n8n workflow is active<br>
+                                2. Verify the webhook URL is correct<br>
+                                3. Ensure CORS is enabled on your n8n instance
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `
+                    <svg viewBox="0 0 24 24"><path fill="white" d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+                    Generate Question Paper
+                `;
+            }
+        });
+    </script>
+</body>
+
+</html>
