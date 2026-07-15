@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Planner — NMTC Prep</title>
+    <meta name="description"
+        content="An 8-week NMTC preparation plan with a progress tracker that saves your ticks in the browser.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27 fill=%27%23a5b4fc%27>π</text></svg>">
+</head>
+
+<body>
+    <div class="bg-gradient"></div>
+
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a class="nav-brand" href="index.html"><span class="brand-badge">π</span> NMTC Prep</a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="about.html">About NMTC</a>
+                <a href="syllabus.html">Syllabus</a>
+                <a href="practice.html">Practice</a>
+                <a href="mock-test.html">Mock Test</a>
+                <a href="formulas.html">Formulas</a>
+                <a href="planner.html" class="active">Planner</a>
+                <a href="resources.html">Resources</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container narrow">
+        <div class="page-header">
+            <h1>8-Week Study Planner</h1>
+            <p>A structured run-up to the Preliminary round. Tick tasks as you finish them — progress is saved
+                in this browser automatically.</p>
+        </div>
+
+        <div class="sticky-bar">
+            <div style="flex: 1; min-width: 220px;">
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:6px;">
+                    <span style="color: var(--text-secondary);">Overall progress</span>
+                    <strong id="progress-label" style="color: var(--primary-light);">0%</strong>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%;"></div>
+                </div>
+            </div>
+            <button class="btn btn-outline btn-sm" id="clear-btn">Clear all ticks</button>
+        </div>
+
+        <div id="plan"></div>
+
+        <div class="callout">
+            <span class="icon">💡</span>
+            <span><strong>Daily rhythm that works:</strong> 30–45 minutes of focused problem solving beats a
+                3-hour weekend cram. Keep an error notebook — write down every problem you got wrong and re-solve
+                it a week later.</span>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        NMTC Prep — free &amp; open-source study companion for the National Mathematics Talent Contest ·
+        <a href="resources.html">Resources</a> · <a href="about.html">About</a>
+    </footer>
+
+    <script>
+        (function () {
+            const PLAN = [
+                {
+                    week: "Week 1 — Know the battlefield",
+                    tasks: [
+                        "Read the About NMTC page and note your contest level and (approximate) exam dates",
+                        "Go through the Syllabus page and mark each topic ✅ strong / ⚠️ shaky / ❌ new",
+                        "Solve the Practice set for your level once, untimed, reading every solution",
+                        "Set up an error notebook (physical or digital) for wrong answers"
+                    ]
+                },
+                {
+                    week: "Week 2 — Numbers & divisibility",
+                    tasks: [
+                        "Revise divisibility rules, HCF/LCM, primes and remainders",
+                        "Learn the units-digit cycle trick and trailing-zeros formula from the Formula Sheets",
+                        "Solve 15 number-theory problems from a book or past papers",
+                        "Re-solve every wrong problem from Week 1"
+                    ]
+                },
+                {
+                    week: "Week 3 — Algebra & identities",
+                    tasks: [
+                        "Master the core identities: (a±b)², a²−b², a³±b³, and a³+b³+c³−3abc",
+                        "Practise sums of roots of quadratics (α+β, αβ, α²+β²)",
+                        "Learn telescoping sums and AP/GP formulas with 10 practice problems",
+                        "Take your first timed Mock Test and log the score"
+                    ]
+                },
+                {
+                    week: "Week 4 — Geometry I",
+                    tasks: [
+                        "Revise angle facts: triangle sum, polygon angle sums, parallel lines",
+                        "Practise angle-chasing problems (10 problems, always draw the figure)",
+                        "Revise Pythagoras, special triangles and basic area formulas",
+                        "Re-solve everything in the error notebook older than a week"
+                    ]
+                },
+                {
+                    week: "Week 5 — Geometry II & counting",
+                    tasks: [
+                        "Circles: chords, tangents, inscribed angles, cyclic quadrilaterals",
+                        "Counting: handshakes, diagonals, subsets, simple permutations/combinations",
+                        "Learn the pigeonhole principle with 5 classic examples",
+                        "Take Mock Test #2 — compare with Week 3's score"
+                    ]
+                },
+                {
+                    week: "Week 6 — Past papers I",
+                    tasks: [
+                        "Get past NMTC papers for your level (AMTI publications or your school)",
+                        "Solve one full past paper untimed; grade yourself honestly",
+                        "Classify every miss: concept gap vs. careless slip vs. time pressure",
+                        "Patch the two biggest concept gaps with targeted practice"
+                    ]
+                },
+                {
+                    week: "Week 7 — Past papers II, under time",
+                    tasks: [
+                        "Solve one full past paper under strict exam timing",
+                        "Practise the 'estimate to eliminate' tactic on objective questions",
+                        "Take Mock Test #3 at your level",
+                        "Skim the Formula Sheets and flag anything you still hesitate on"
+                    ]
+                },
+                {
+                    week: "Week 8 — Taper & sharpen",
+                    tasks: [
+                        "Light daily practice only — 5 to 8 problems, all from your error notebook",
+                        "Final read-through of the Formula Sheets (twice this week)",
+                        "Prepare exam-day logistics: admit card, geometry box, watch, water",
+                        "Sleep well the last two nights — a fresh brain out-solves a crammed one"
+                    ]
+                }
+            ];
+
+            const STORAGE_KEY = 'nmtc-planner-v1';
+            let state = {};
+            try { state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch (e) { state = {}; }
+
+            const planEl = document.getElementById('plan');
+            const fill = document.getElementById('progress-fill');
+            const label = document.getElementById('progress-label');
+            let total = 0;
+
+            PLAN.forEach((wk, wi) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                const h = document.createElement('h3');
+                h.textContent = wk.week;
+                card.appendChild(h);
+
+                wk.tasks.forEach((task, ti) => {
+                    total++;
+                    const id = 'w' + wi + 't' + ti;
+                    const row = document.createElement('div');
+                    row.className = 'task-row';
+
+                    const cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    cb.id = id;
+                    cb.checked = !!state[id];
+                    cb.addEventListener('change', () => {
+                        state[id] = cb.checked;
+                        if (!cb.checked) delete state[id];
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                        updateProgress();
+                    });
+
+                    const lb = document.createElement('label');
+                    lb.htmlFor = id;
+                    lb.textContent = task;
+
+                    row.appendChild(cb);
+                    row.appendChild(lb);
+                    card.appendChild(row);
+                });
+                planEl.appendChild(card);
+            });
+
+            function updateProgress() {
+                const done = Object.keys(state).length;
+                const pct = total ? Math.round(100 * done / total) : 0;
+                fill.style.width = pct + '%';
+                label.textContent = pct + '% (' + done + '/' + total + ' tasks)';
+            }
+
+            document.getElementById('clear-btn').addEventListener('click', () => {
+                if (!confirm('Clear all your planner ticks?')) return;
+                state = {};
+                localStorage.removeItem(STORAGE_KEY);
+                planEl.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = false);
+                updateProgress();
+            });
+
+            updateProgress();
+        })();
+    </script>
+    <script src="js/ui.js"></script>
+</body>
+
+</html>
