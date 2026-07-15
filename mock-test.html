@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timed Mock Test — NMTC Prep</title>
+    <meta name="description"
+        content="Take a timed NMTC-style mock test: 10 random questions, a 30-minute countdown, instant scoring and full answer review.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27 fill=%27%23a5b4fc%27>π</text></svg>">
+</head>
+
+<body>
+    <div class="bg-gradient"></div>
+
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a class="nav-brand" href="index.html"><span class="brand-badge">π</span> NMTC Prep</a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="about.html">About NMTC</a>
+                <a href="syllabus.html">Syllabus</a>
+                <a href="practice.html">Practice</a>
+                <a href="mock-test.html" class="active">Mock Test</a>
+                <a href="formulas.html">Formulas</a>
+                <a href="planner.html">Planner</a>
+                <a href="resources.html">Resources</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container narrow">
+        <div class="page-header">
+            <h1>Timed Mock Test</h1>
+            <p>10 random questions from your chosen level · 30 minutes · auto-submits when time runs out.
+                No solutions are shown until you finish — just like the real thing.</p>
+        </div>
+
+        <!-- Setup screen -->
+        <div id="setup-screen">
+            <div class="card" style="text-align:center;">
+                <h3>Choose your contest level</h3>
+                <div class="pill-row" id="level-pills" style="justify-content:center; margin-top: 16px;"></div>
+                <button class="btn btn-primary" id="start-btn">Start Test ▶</button>
+                <p style="margin-top: 14px; font-size: 0.85rem; color: var(--text-muted);">
+                    The timer starts immediately. Answers can be changed until you submit.</p>
+            </div>
+        </div>
+
+        <!-- Test screen -->
+        <div id="test-screen" style="display:none;">
+            <div class="sticky-bar">
+                <div class="timer" id="timer">30:00</div>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                    Answered: <strong id="answered-count" style="color: var(--primary-light);">0 / 10</strong>
+                </div>
+                <button class="btn btn-primary btn-sm" id="submit-btn">Submit Test</button>
+            </div>
+            <div id="test-questions"></div>
+        </div>
+
+        <!-- Result screen -->
+        <div id="result-screen" style="display:none;">
+            <div class="card" style="text-align:center;">
+                <h3 id="result-heading">Your Result</h3>
+                <div class="score-big" id="result-score"></div>
+                <p id="result-message" style="margin-bottom: 8px;"></p>
+                <p style="font-size: 0.85rem; color: var(--text-muted);" id="result-time"></p>
+                <div style="margin-top: 18px;">
+                    <button class="btn btn-primary" id="retry-btn">Take Another Test</button>
+                </div>
+            </div>
+            <h2 class="section-title">Answer review</h2>
+            <div id="review-list"></div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        NMTC Prep — free &amp; open-source study companion for the National Mathematics Talent Contest ·
+        <a href="resources.html">Resources</a> · <a href="about.html">About</a>
+    </footer>
+
+    <script src="js/questions.js"></script>
+    <script>
+        (function () {
+            const NUM_QUESTIONS = 10;
+            const DURATION_SECONDS = 30 * 60;
+
+            const setupScreen = document.getElementById('setup-screen');
+            const testScreen = document.getElementById('test-screen');
+            const resultScreen = document.getElementById('result-screen');
+            const pillRow = document.getElementById('level-pills');
+            const timerEl = document.getElementById('timer');
+            const answeredEl = document.getElementById('answered-count');
+
+            let level = 'primary';
+            let testQs = [];
+            let answers = [];
+            let timerId = null;
+            let remaining = DURATION_SECONDS;
+
+            Object.entries(LEVELS).forEach(([key, meta], i) => {
+                const btn = document.createElement('button');
+                btn.className = 'pill' + (i === 0 ? ' active' : '');
+                btn.textContent = meta.name;
+                btn.dataset.level = key;
+                btn.addEventListener('click', () => {
+                    level = key;
+                    pillRow.querySelectorAll('.pill').forEach(p =>
+                        p.classList.toggle('active', p.dataset.level === key));
+                });
+                pillRow.appendChild(btn);
+            });
+
+            function shuffle(arr) {
+                const a = arr.slice();
+                for (let i = a.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [a[i], a[j]] = [a[j], a[i]];
+                }
+                return a;
+            }
+
+            function fmt(s) {
+                const m = Math.floor(s / 60), sec = s % 60;
+                return String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+            }
+
+            function startTest() {
+                const pool = QUESTIONS.filter(q => q.level === level);
+                testQs = shuffle(pool).slice(0, NUM_QUESTIONS);
+                answers = new Array(testQs.length).fill(null);
+                remaining = DURATION_SECONDS;
+
+                setupScreen.style.display = 'none';
+                resultScreen.style.display = 'none';
+                testScreen.style.display = '';
+                renderTest();
+                updateAnswered();
+
+                timerEl.classList.remove('warning');
+                timerEl.textContent = fmt(remaining);
+                timerId = setInterval(() => {
+                    remaining--;
+                    timerEl.textContent = fmt(remaining);
+                    if (remaining <= 120) timerEl.classList.add('warning');
+                    if (remaining <= 0) finishTest(true);
+                }, 1000);
+                window.scrollTo(0, 0);
+            }
+
+            function renderTest() {
+                const wrap = document.getElementById('test-questions');
+                wrap.innerHTML = '';
+                testQs.forEach((q, idx) => {
+                    const card = document.createElement('div');
+                    card.className = 'card question-card';
+                    card.innerHTML = '<div class="q-meta"><span class="q-number">Q' + (idx + 1) +
+                        '</span><span class="badge topic">' + q.topic + '</span></div>' +
+                        '<div class="q-text">' + q.q + '</div>';
+                    const optWrap = document.createElement('div');
+                    optWrap.className = 'options';
+                    q.options.forEach((opt, oi) => {
+                        const b = document.createElement('button');
+                        b.className = 'option';
+                        b.innerHTML = '<strong>' + String.fromCharCode(65 + oi) + '.</strong> ' + opt;
+                        b.addEventListener('click', () => {
+                            answers[idx] = oi;
+                            optWrap.querySelectorAll('.option').forEach((x, xi) =>
+                                x.classList.toggle('selected', xi === oi));
+                            updateAnswered();
+                        });
+                        optWrap.appendChild(b);
+                    });
+                    card.appendChild(optWrap);
+                    wrap.appendChild(card);
+                });
+            }
+
+            function updateAnswered() {
+                const n = answers.filter(a => a !== null).length;
+                answeredEl.textContent = n + ' / ' + testQs.length;
+            }
+
+            function finishTest(auto) {
+                clearInterval(timerId);
+                testScreen.style.display = 'none';
+                resultScreen.style.display = '';
+
+                const score = testQs.reduce((s, q, i) => s + (answers[i] === q.answer ? 1 : 0), 0);
+                const pct = Math.round(100 * score / testQs.length);
+
+                document.getElementById('result-heading').textContent =
+                    auto ? "Time's up — auto-submitted" : 'Your Result';
+                document.getElementById('result-score').textContent = score + ' / ' + testQs.length;
+                document.getElementById('result-message').textContent =
+                    pct >= 80 ? '🏆 Outstanding! You are in great shape for the NMTC.' :
+                    pct >= 60 ? '💪 Good work — review the ones you missed and try again.' :
+                    pct >= 40 ? '📖 A solid start. Revisit the topics you slipped on, then retake the test.' :
+                    '🌱 Keep going — work through the Practice page with solutions, then come back.';
+                document.getElementById('result-time').textContent =
+                    'Time used: ' + fmt(DURATION_SECONDS - Math.max(remaining, 0)) +
+                    ' · Level: ' + LEVELS[level].name;
+
+                const review = document.getElementById('review-list');
+                review.innerHTML = '';
+                testQs.forEach((q, idx) => {
+                    const mine = answers[idx];
+                    const right = mine === q.answer;
+                    const card = document.createElement('div');
+                    card.className = 'card question-card';
+                    card.innerHTML =
+                        '<div class="q-meta"><span class="q-number">Q' + (idx + 1) + '</span>' +
+                        '<span class="badge topic">' + q.topic + '</span>' +
+                        '<span class="badge" style="background:' +
+                        (right ? 'rgba(16,185,129,0.18); color:#6ee7b7' :
+                            'rgba(239,68,68,0.18); color:#fca5a5') + '">' +
+                        (right ? 'Correct' : (mine === null ? 'Skipped' : 'Wrong')) + '</span></div>' +
+                        '<div class="q-text">' + q.q + '</div>' +
+                        '<p style="font-size:0.9rem;">Your answer: <strong>' +
+                        (mine === null ? '—' : String.fromCharCode(65 + mine) + '. ' + q.options[mine]) +
+                        '</strong><br>Correct answer: <strong style="color:var(--success);">' +
+                        String.fromCharCode(65 + q.answer) + '. ' + q.options[q.answer] + '</strong></p>' +
+                        '<div class="solution-box"><b>Solution.</b> ' + q.solution + '</div>';
+                    review.appendChild(card);
+                });
+                window.scrollTo(0, 0);
+            }
+
+            document.getElementById('start-btn').addEventListener('click', startTest);
+            document.getElementById('submit-btn').addEventListener('click', () => finishTest(false));
+            document.getElementById('retry-btn').addEventListener('click', () => {
+                resultScreen.style.display = 'none';
+                setupScreen.style.display = '';
+                window.scrollTo(0, 0);
+            });
+        })();
+    </script>
+</body>
+
+</html>

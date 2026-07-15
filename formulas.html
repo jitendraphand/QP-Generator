@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formula Sheets — NMTC Prep</title>
+    <meta name="description"
+        content="Quick-revision formula sheets for NMTC preparation: number theory, algebra, geometry, combinatorics and useful contest facts.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27 fill=%27%23a5b4fc%27>π</text></svg>">
+</head>
+
+<body>
+    <div class="bg-gradient"></div>
+
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a class="nav-brand" href="index.html"><span class="brand-badge">π</span> NMTC Prep</a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="about.html">About NMTC</a>
+                <a href="syllabus.html">Syllabus</a>
+                <a href="practice.html">Practice</a>
+                <a href="mock-test.html">Mock Test</a>
+                <a href="formulas.html" class="active">Formulas</a>
+                <a href="planner.html">Planner</a>
+                <a href="resources.html">Resources</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container narrow">
+        <div class="page-header">
+            <h1>Formula &amp; Fact Sheets</h1>
+            <p>The identities, theorems and standard results that show up again and again in NMTC problems.
+                Don't just memorise — know one example of each in action.</p>
+        </div>
+
+        <div class="card">
+            <h3>🔢 Number Theory</h3>
+            <ul class="formula-list">
+                <li><span class="f-label">Sum of first n natural numbers</span>
+                    <span class="formula">1 + 2 + … + n = n(n+1)/2</span></li>
+                <li><span class="f-label">Sum of first n odd numbers</span>
+                    <span class="formula">1 + 3 + 5 + … + (2n−1) = n²</span></li>
+                <li><span class="f-label">Sum of squares</span>
+                    <span class="formula">1² + 2² + … + n² = n(n+1)(2n+1)/6</span></li>
+                <li><span class="f-label">Sum of cubes</span>
+                    <span class="formula">1³ + 2³ + … + n³ = [n(n+1)/2]²</span></li>
+                <li><span class="f-label">Number of divisors of N = p<sup>a</sup>q<sup>b</sup>r<sup>c</sup></span>
+                    <span class="formula">d(N) = (a+1)(b+1)(c+1)</span></li>
+                <li><span class="f-label">HCF × LCM</span>
+                    <span class="formula">HCF(a, b) × LCM(a, b) = a × b</span></li>
+                <li><span class="f-label">Fermat's little theorem (p prime, p ∤ a)</span>
+                    <span class="formula">a<sup>p−1</sup> ≡ 1 (mod p)</span></li>
+                <li><span class="f-label">Trailing zeros of n!</span>
+                    <span class="formula">⌊n/5⌋ + ⌊n/25⌋ + ⌊n/125⌋ + …</span></li>
+                <li><span class="f-label">Units digits of powers</span>
+                    <span class="formula">cycle with period 1, 2 or 4 — reduce the exponent mod the cycle length</span></li>
+                <li><span class="f-label">For prime p &gt; 3</span>
+                    <span class="formula">24 divides p² − 1</span></li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>🧮 Algebra</h3>
+            <ul class="formula-list">
+                <li><span class="f-label">Basic identities</span>
+                    <span class="formula">(a ± b)² = a² ± 2ab + b² ; a² − b² = (a−b)(a+b)</span></li>
+                <li><span class="f-label">Cubes</span>
+                    <span class="formula">a³ ± b³ = (a ± b)(a² ∓ ab + b²)</span></li>
+                <li><span class="f-label">The three-variable classic</span>
+                    <span class="formula">a³ + b³ + c³ − 3abc = (a+b+c)(a² + b² + c² − ab − bc − ca)</span></li>
+                <li><span class="f-label">…so if a + b + c = 0</span>
+                    <span class="formula">a³ + b³ + c³ = 3abc</span></li>
+                <li><span class="f-label">Quadratic x² + px + q = 0 with roots α, β</span>
+                    <span class="formula">α + β = −p, αβ = q ; α² + β² = (α+β)² − 2αβ</span></li>
+                <li><span class="f-label">Power sums recurrence (roots of x² = sx − q)</span>
+                    <span class="formula">αⁿ + βⁿ = s(αⁿ⁻¹ + βⁿ⁻¹) − q(αⁿ⁻² + βⁿ⁻²)</span></li>
+                <li><span class="f-label">AM–GM inequality (a, b ≥ 0)</span>
+                    <span class="formula">(a + b)/2 ≥ √(ab), equality iff a = b</span></li>
+                <li><span class="f-label">Telescoping</span>
+                    <span class="formula">1/(n(n+1)) = 1/n − 1/(n+1)</span></li>
+                <li><span class="f-label">Geometric series (|r| &lt; 1)</span>
+                    <span class="formula">a + ar + ar² + … = a/(1 − r)</span></li>
+                <li><span class="f-label">AP: nth term &amp; sum</span>
+                    <span class="formula">aₙ = a + (n−1)d ; Sₙ = n(a + aₙ)/2</span></li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>📐 Geometry</h3>
+            <ul class="formula-list">
+                <li><span class="f-label">Angle sum of an n-gon</span>
+                    <span class="formula">(n − 2) × 180°</span></li>
+                <li><span class="f-label">Diagonals of an n-gon</span>
+                    <span class="formula">n(n − 3)/2</span></li>
+                <li><span class="f-label">Pythagoras</span>
+                    <span class="formula">a² + b² = c² (right angle opposite c)</span></li>
+                <li><span class="f-label">Inradius of a right triangle (legs a, b, hyp c)</span>
+                    <span class="formula">r = (a + b − c)/2</span></li>
+                <li><span class="f-label">Area of a triangle</span>
+                    <span class="formula">½ × base × height = rs = abc/(4R) (r = inradius, s = semi-perimeter, R = circumradius)</span></li>
+                <li><span class="f-label">Heron's formula</span>
+                    <span class="formula">Area = √(s(s−a)(s−b)(s−c)), s = (a+b+c)/2</span></li>
+                <li><span class="f-label">Chord at distance d from centre, radius r</span>
+                    <span class="formula">chord length = 2√(r² − d²)</span></li>
+                <li><span class="f-label">Angle in a semicircle</span>
+                    <span class="formula">90° ; central angle = 2 × inscribed angle on the same arc</span></li>
+                <li><span class="f-label">Cyclic quadrilateral</span>
+                    <span class="formula">opposite angles sum to 180°</span></li>
+                <li><span class="f-label">Clock hands</span>
+                    <span class="formula">hour hand: 0.5°/min ; minute hand: 6°/min ; relative: 5.5°/min</span></li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>🎲 Combinatorics &amp; Counting</h3>
+            <ul class="formula-list">
+                <li><span class="f-label">Permutations &amp; combinations</span>
+                    <span class="formula">P(n, r) = n!/(n−r)! ; C(n, r) = n!/(r!(n−r)!)</span></li>
+                <li><span class="f-label">Handshakes / pairs from n people</span>
+                    <span class="formula">C(n, 2) = n(n−1)/2</span></li>
+                <li><span class="f-label">Subsets of an n-element set</span>
+                    <span class="formula">2ⁿ (including ∅) ; sum of all C(n, k) = 2ⁿ</span></li>
+                <li><span class="f-label">Circular arrangements of n people</span>
+                    <span class="formula">(n − 1)!</span></li>
+                <li><span class="f-label">Inclusion–exclusion (two sets)</span>
+                    <span class="formula">|A ∪ B| = |A| + |B| − |A ∩ B|</span></li>
+                <li><span class="f-label">Pigeonhole principle</span>
+                    <span class="formula">n+1 objects in n boxes ⇒ some box holds ≥ 2</span></li>
+                <li><span class="f-label">Binomial theorem</span>
+                    <span class="formula">(1 + x)ⁿ = Σ C(n, k) xᵏ</span></li>
+                <li><span class="f-label">Squares on an n × n grid</span>
+                    <span class="formula">1² + 2² + … + n² = n(n+1)(2n+1)/6</span></li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>⚡ Contest Tactics</h3>
+            <ul>
+                <li><strong>Work modulo small numbers.</strong> Last-digit and remainder questions almost always
+                    reduce to a short repeating cycle.</li>
+                <li><strong>Try small cases first.</strong> Compute the pattern for n = 1, 2, 3 and guess the
+                    general rule — then justify it.</li>
+                <li><strong>Factor before you expand.</strong> Contest algebra rewards recognising a² − b²,
+                    telescoping, and symmetric functions of roots.</li>
+                <li><strong>Draw and label.</strong> In geometry, mark every equal angle and length; the
+                    solution usually appears in the picture.</li>
+                <li><strong>Count complements.</strong> "At least one" is usually easier as "total minus none".</li>
+                <li><strong>Estimate to eliminate.</strong> In the objective round, bounding the answer often
+                    kills three options instantly.</li>
+            </ul>
+        </div>
+
+        <div style="text-align:center; margin-top: 30px;">
+            <a class="btn btn-primary" href="mock-test.html">Test yourself under time →</a>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        NMTC Prep — free &amp; open-source study companion for the National Mathematics Talent Contest ·
+        <a href="resources.html">Resources</a> · <a href="about.html">About</a>
+    </footer>
+</body>
+
+</html>

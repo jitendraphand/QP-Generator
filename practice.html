@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practice Questions — NMTC Prep</title>
+    <meta name="description"
+        content="Interactive NMTC practice: olympiad-style questions for every level with instant feedback and full solutions.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27 fill=%27%23a5b4fc%27>π</text></svg>">
+</head>
+
+<body>
+    <div class="bg-gradient"></div>
+
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a class="nav-brand" href="index.html"><span class="brand-badge">π</span> NMTC Prep</a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="about.html">About NMTC</a>
+                <a href="syllabus.html">Syllabus</a>
+                <a href="practice.html" class="active">Practice</a>
+                <a href="mock-test.html">Mock Test</a>
+                <a href="formulas.html">Formulas</a>
+                <a href="planner.html">Planner</a>
+                <a href="resources.html">Resources</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container narrow">
+        <div class="page-header">
+            <h1>Practice Questions</h1>
+            <p>Pick your contest level, answer each question, and read the solution — even when you're right.
+                Your running score for this session is shown below.</p>
+        </div>
+
+        <div class="pill-row" id="level-pills" role="tablist" aria-label="Contest level"></div>
+
+        <div class="sticky-bar">
+            <div>
+                <strong id="level-label"></strong>
+                <span style="color: var(--text-muted); font-size: 0.85rem;" id="level-classes"></span>
+            </div>
+            <div style="color: var(--text-secondary); font-size: 0.95rem;">
+                Score: <strong id="score" style="color: var(--primary-light);">0 / 0</strong>
+                <button class="btn btn-outline btn-sm" id="reset-btn" style="margin-left: 12px;">Reset</button>
+            </div>
+        </div>
+
+        <div id="question-list"></div>
+    </div>
+
+    <footer class="site-footer">
+        NMTC Prep — free &amp; open-source study companion for the National Mathematics Talent Contest ·
+        <a href="resources.html">Resources</a> · <a href="about.html">About</a>
+    </footer>
+
+    <script src="js/questions.js"></script>
+    <script>
+        (function () {
+            const pillRow = document.getElementById('level-pills');
+            const listEl = document.getElementById('question-list');
+            const scoreEl = document.getElementById('score');
+            const levelLabel = document.getElementById('level-label');
+            const levelClasses = document.getElementById('level-classes');
+
+            let currentLevel = 'primary';
+            let attempted = 0, correct = 0;
+
+            // Level pills
+            Object.entries(LEVELS).forEach(([key, meta], i) => {
+                const btn = document.createElement('button');
+                btn.className = 'pill' + (i === 0 ? ' active' : '');
+                btn.textContent = meta.name;
+                btn.dataset.level = key;
+                btn.addEventListener('click', () => selectLevel(key));
+                pillRow.appendChild(btn);
+            });
+
+            function selectLevel(key) {
+                currentLevel = key;
+                attempted = 0; correct = 0;
+                updateScore();
+                pillRow.querySelectorAll('.pill').forEach(p =>
+                    p.classList.toggle('active', p.dataset.level === key));
+                render();
+            }
+
+            function updateScore() {
+                scoreEl.textContent = correct + ' / ' + attempted;
+            }
+
+            function render() {
+                const meta = LEVELS[currentLevel];
+                levelLabel.textContent = meta.name + ' ';
+                levelClasses.textContent = '· ' + meta.classes;
+                listEl.innerHTML = '';
+
+                const qs = QUESTIONS.filter(q => q.level === currentLevel);
+                qs.forEach((q, idx) => {
+                    const card = document.createElement('div');
+                    card.className = 'card question-card';
+
+                    const meta = document.createElement('div');
+                    meta.className = 'q-meta';
+                    meta.innerHTML = '<span class="q-number">Q' + (idx + 1) + '</span>' +
+                        '<span class="badge topic">' + q.topic + '</span>';
+                    card.appendChild(meta);
+
+                    const text = document.createElement('div');
+                    text.className = 'q-text';
+                    text.innerHTML = q.q;
+                    card.appendChild(text);
+
+                    const optWrap = document.createElement('div');
+                    optWrap.className = 'options';
+                    const buttons = [];
+
+                    q.options.forEach((opt, oi) => {
+                        const b = document.createElement('button');
+                        b.className = 'option';
+                        b.innerHTML = '<strong>' + String.fromCharCode(65 + oi) + '.</strong> ' + opt;
+                        b.addEventListener('click', () => {
+                            buttons.forEach(x => x.disabled = true);
+                            attempted++;
+                            if (oi === q.answer) {
+                                b.classList.add('correct');
+                                correct++;
+                            } else {
+                                b.classList.add('wrong');
+                                buttons[q.answer].classList.add('correct');
+                            }
+                            updateScore();
+                            const sol = document.createElement('div');
+                            sol.className = 'solution-box';
+                            sol.innerHTML = '<b>' + (oi === q.answer ? '✓ Correct.' : '✗ Not quite.') +
+                                '</b> ' + q.solution;
+                            card.appendChild(sol);
+                        });
+                        buttons.push(b);
+                        optWrap.appendChild(b);
+                    });
+
+                    card.appendChild(optWrap);
+                    listEl.appendChild(card);
+                });
+            }
+
+            document.getElementById('reset-btn').addEventListener('click', () => selectLevel(currentLevel));
+
+            render();
+            updateScore();
+        })();
+    </script>
+</body>
+
+</html>
