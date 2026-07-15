@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Practice Questions — NMTC Prep</title>
     <meta name="description"
-        content="Interactive NMTC practice: olympiad-style questions for every level with instant feedback and full solutions.">
+        content="Interactive NMTC practice: 100 olympiad-style questions for every level with instant feedback, difficulty filters and full solutions.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27 fill=%27%23a5b4fc%27>π</text></svg>">
@@ -34,20 +34,35 @@
     <div class="container narrow">
         <div class="page-header">
             <h1>Practice Questions</h1>
-            <p>Pick your contest level, answer each question, and read the solution — even when you're right.
-                Your running score for this session is shown below.</p>
+            <p>Pick your contest level, filter by difficulty or topic, and answer away. Read the solution
+                even when you're right — that's where the technique lives.</p>
         </div>
 
         <div class="pill-row" id="level-pills" role="tablist" aria-label="Contest level"></div>
 
+        <div class="filter-bar">
+            <button class="pill diff-pill active" data-diff="all">All</button>
+            <button class="pill diff-pill" data-diff="easy">🟢 Easy</button>
+            <button class="pill diff-pill" data-diff="medium">🟡 Medium</button>
+            <button class="pill diff-pill" data-diff="hard">🔴 Hard</button>
+            <span class="spacer"></span>
+            <select class="select" id="topic-select" aria-label="Filter by topic">
+                <option value="all">All topics</option>
+            </select>
+        </div>
+
         <div class="sticky-bar">
-            <div>
-                <strong id="level-label"></strong>
-                <span style="color: var(--text-muted); font-size: 0.85rem;" id="level-classes"></span>
+            <div class="practice-progress">
+                <span class="count" id="progress-count">0 / 0 attempted</span>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+                </div>
+                <strong id="score" style="color: var(--primary-light); white-space: nowrap;">✔ 0</strong>
             </div>
-            <div style="color: var(--text-secondary); font-size: 0.95rem;">
-                Score: <strong id="score" style="color: var(--primary-light);">0 / 0</strong>
-                <button class="btn btn-outline btn-sm" id="reset-btn" style="margin-left: 12px;">Reset</button>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <span class="streak-chip" id="streak-chip" title="Current correct-answer streak">🔥 <span
+                        id="streak-num">0</span></span>
+                <button class="btn btn-outline btn-sm" id="reset-btn">Reset</button>
             </div>
         </div>
 
@@ -60,47 +75,98 @@
     </footer>
 
     <script src="js/questions.js"></script>
+    <script src="js/ui.js"></script>
     <script>
         (function () {
             const pillRow = document.getElementById('level-pills');
             const listEl = document.getElementById('question-list');
             const scoreEl = document.getElementById('score');
-            const levelLabel = document.getElementById('level-label');
-            const levelClasses = document.getElementById('level-classes');
+            const progressCount = document.getElementById('progress-count');
+            const progressFill = document.getElementById('progress-fill');
+            const topicSelect = document.getElementById('topic-select');
+            const streakChip = document.getElementById('streak-chip');
+            const streakNum = document.getElementById('streak-num');
 
             let currentLevel = 'primary';
-            let attempted = 0, correct = 0;
+            let currentDiff = 'all';
+            let currentTopic = 'all';
+            let attempted = 0, correct = 0, streak = 0, best = 0;
+            let visibleCount = 0;
 
             // Level pills
             Object.entries(LEVELS).forEach(([key, meta], i) => {
                 const btn = document.createElement('button');
                 btn.className = 'pill' + (i === 0 ? ' active' : '');
-                btn.textContent = meta.name;
+                btn.textContent = meta.icon + ' ' + meta.name;
                 btn.dataset.level = key;
-                btn.addEventListener('click', () => selectLevel(key));
+                btn.addEventListener('click', () => {
+                    currentLevel = key;
+                    pillRow.querySelectorAll('.pill').forEach(p =>
+                        p.classList.toggle('active', p.dataset.level === key));
+                    resetRound();
+                });
                 pillRow.appendChild(btn);
             });
 
-            function selectLevel(key) {
-                currentLevel = key;
-                attempted = 0; correct = 0;
-                updateScore();
-                pillRow.querySelectorAll('.pill').forEach(p =>
-                    p.classList.toggle('active', p.dataset.level === key));
-                render();
+            // Difficulty pills
+            document.querySelectorAll('.diff-pill').forEach(p => {
+                p.addEventListener('click', () => {
+                    currentDiff = p.dataset.diff;
+                    document.querySelectorAll('.diff-pill').forEach(x =>
+                        x.classList.toggle('active', x === p));
+                    resetRound();
+                });
+            });
+
+            topicSelect.addEventListener('change', () => {
+                currentTopic = topicSelect.value;
+                resetRound();
+            });
+
+            function fillTopics() {
+                const topics = [...new Set(QUESTIONS
+                    .filter(q => q.level === currentLevel).map(q => q.topic))].sort();
+                const prev = currentTopic;
+                topicSelect.innerHTML = '<option value="all">All topics</option>' +
+                    topics.map(t => '<option value="' + t + '">' + t + '</option>').join('');
+                currentTopic = topics.includes(prev) ? prev : 'all';
+                topicSelect.value = currentTopic;
             }
 
-            function updateScore() {
-                scoreEl.textContent = correct + ' / ' + attempted;
+            function resetRound() {
+                attempted = 0; correct = 0; streak = 0;
+                fillTopics();
+                render();
+                updateHud();
+            }
+
+            function updateHud(bumpStreak) {
+                scoreEl.textContent = '✔ ' + correct;
+                progressCount.textContent = attempted + ' / ' + visibleCount + ' attempted';
+                progressFill.style.width = visibleCount ?
+                    Math.round(100 * attempted / visibleCount) + '%' : '0%';
+                streakNum.textContent = streak;
+                if (bumpStreak) {
+                    streakChip.classList.remove('bump');
+                    void streakChip.offsetWidth;
+                    streakChip.classList.add('bump');
+                }
             }
 
             function render() {
-                const meta = LEVELS[currentLevel];
-                levelLabel.textContent = meta.name + ' ';
-                levelClasses.textContent = '· ' + meta.classes;
                 listEl.innerHTML = '';
+                const qs = QUESTIONS.filter(q =>
+                    q.level === currentLevel &&
+                    (currentDiff === 'all' || q.diff === currentDiff) &&
+                    (currentTopic === 'all' || q.topic === currentTopic));
+                visibleCount = qs.length;
 
-                const qs = QUESTIONS.filter(q => q.level === currentLevel);
+                if (!qs.length) {
+                    listEl.innerHTML = '<div class="empty-state"><span class="glyph">🔍</span>' +
+                        'No questions match this filter — try widening it.</div>';
+                    return;
+                }
+
                 qs.forEach((q, idx) => {
                     const card = document.createElement('div');
                     card.className = 'card question-card';
@@ -108,7 +174,8 @@
                     const meta = document.createElement('div');
                     meta.className = 'q-meta';
                     meta.innerHTML = '<span class="q-number">Q' + (idx + 1) + '</span>' +
-                        '<span class="badge topic">' + q.topic + '</span>';
+                        '<span class="badge topic">' + q.topic + '</span>' +
+                        '<span class="badge ' + q.diff + '">' + q.diff + '</span>';
                     card.appendChild(meta);
 
                     const text = document.createElement('div');
@@ -127,18 +194,23 @@
                         b.addEventListener('click', () => {
                             buttons.forEach(x => x.disabled = true);
                             attempted++;
-                            if (oi === q.answer) {
+                            const right = oi === q.answer;
+                            if (right) {
                                 b.classList.add('correct');
                                 correct++;
+                                streak++;
+                                sparkleBurst(card);
                             } else {
                                 b.classList.add('wrong');
                                 buttons[q.answer].classList.add('correct');
+                                streak = 0;
                             }
-                            updateScore();
+                            updateHud(right);
                             const sol = document.createElement('div');
                             sol.className = 'solution-box';
-                            sol.innerHTML = '<b>' + (oi === q.answer ? '✓ Correct.' : '✗ Not quite.') +
-                                '</b> ' + q.solution;
+                            sol.innerHTML = '<b>' + (right ?
+                                (streak >= 3 ? '✓ Correct — ' + streak + ' in a row! 🔥' : '✓ Correct.') :
+                                '✗ Not quite.') + '</b> ' + q.solution;
                             card.appendChild(sol);
                         });
                         buttons.push(b);
@@ -148,12 +220,13 @@
                     card.appendChild(optWrap);
                     listEl.appendChild(card);
                 });
+
+                revealAll();
             }
 
-            document.getElementById('reset-btn').addEventListener('click', () => selectLevel(currentLevel));
+            document.getElementById('reset-btn').addEventListener('click', resetRound);
 
-            render();
-            updateScore();
+            resetRound();
         })();
     </script>
 </body>

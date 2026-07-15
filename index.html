@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NMTC Prep — National Mathematics Talent Contest Preparation</title>
     <meta name="description"
-        content="Free tools and resources to prepare for the NMTC (National Mathematics Talent Contest) by AMTI — practice questions, mock tests, syllabus, formula sheets and a study planner.">
+        content="Free tools and resources to prepare for the NMTC (National Mathematics Talent Contest) by AMTI — 100 practice questions, mock tests, syllabus, formula sheets and a study planner.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27 fill=%27%23a5b4fc%27>π</text></svg>">
@@ -33,6 +33,12 @@
 
     <div class="container">
         <section class="hero">
+            <span class="float-sym" style="left: 6%; top: 12%;">∑</span>
+            <span class="float-sym" style="left: 14%; top: 62%; animation-delay: -2s;">√</span>
+            <span class="float-sym" style="right: 8%; top: 18%; animation-delay: -4s;">∞</span>
+            <span class="float-sym" style="right: 16%; top: 66%; animation-delay: -1s;">θ</span>
+            <span class="float-sym" style="left: 26%; top: 8%; animation-delay: -3s;">÷</span>
+            <span class="float-sym" style="right: 28%; top: 4%; animation-delay: -5s;">△</span>
             <div class="logo">π</div>
             <h1>Crack the NMTC</h1>
             <p class="tagline">Everything you need to prepare for the <strong>National Mathematics Talent
@@ -44,21 +50,35 @@
 
         <div class="stats-strip">
             <div class="stat">
-                <div class="num">4</div>
+                <div class="num" data-count="4">0</div>
                 <div class="lbl">Contest levels covered</div>
             </div>
             <div class="stat">
-                <div class="num">48+</div>
+                <div class="num" data-count="100">0</div>
                 <div class="lbl">Practice problems with solutions</div>
             </div>
             <div class="stat">
-                <div class="num">2</div>
+                <div class="num" data-count="2">0</div>
                 <div class="lbl">Exam stages explained</div>
             </div>
             <div class="stat">
-                <div class="num">100%</div>
+                <div class="num" data-count="100" data-suffix="%">0%</div>
                 <div class="lbl">Free &amp; open source</div>
             </div>
+        </div>
+
+        <div class="card daily-card" id="daily-card">
+            <div class="daily-head">
+                <h3>⚡ Daily Challenge</h3>
+                <span class="badge" id="daily-level"></span>
+                <span class="badge topic" id="daily-topic"></span>
+                <span class="spacer" style="flex:1"></span>
+                <span class="streak-chip" id="daily-streak" title="Days in a row you solved the daily challenge">🔥
+                    <span id="daily-streak-num">0</span>-day streak</span>
+            </div>
+            <div class="q-text" id="daily-q"></div>
+            <div class="options" id="daily-options"></div>
+            <div id="daily-done"></div>
         </div>
 
         <h2 class="section-title">Learner Tools</h2>
@@ -66,14 +86,14 @@
             <a class="card tool-card" href="practice.html">
                 <span class="tool-icon">🧮</span>
                 <h3>Practice Questions</h3>
-                <p>Olympiad-style problems for every NMTC level, with instant feedback and step-by-step
-                    solutions. Filter by level and topic.</p>
+                <p>100 olympiad-style problems across all NMTC levels, with instant feedback, difficulty
+                    filters and step-by-step solutions.</p>
             </a>
             <a class="card tool-card" href="mock-test.html">
                 <span class="tool-icon">⏱️</span>
                 <h3>Timed Mock Test</h3>
-                <p>Simulate exam pressure: 10 random questions, 30-minute countdown, auto-submit, score card
-                    and full answer review.</p>
+                <p>Simulate exam pressure: 10 random questions, 30-minute countdown, a question palette,
+                    score ring and full answer review.</p>
             </a>
             <a class="card tool-card" href="syllabus.html">
                 <span class="tool-icon">📋</span>
@@ -110,8 +130,8 @@
                     class level and note weak areas.</li>
                 <li><strong>Follow the plan</strong> — use the <a href="planner.html">Study Planner</a> to
                     structure 8 weeks of preparation.</li>
-                <li><strong>Practise daily</strong> — solve problems on the <a href="practice.html">Practice</a>
-                    page and read every solution, even when you get the answer right.</li>
+                <li><strong>Practise daily</strong> — solve the Daily Challenge above, then problems on the
+                    <a href="practice.html">Practice</a> page, reading every solution.</li>
                 <li><strong>Simulate the exam</strong> — take a <a href="mock-test.html">Mock Test</a> each week
                     and revise from the <a href="formulas.html">Formula Sheets</a>.</li>
             </ol>
@@ -130,6 +150,80 @@
         NMTC Prep — free &amp; open-source study companion for the National Mathematics Talent Contest ·
         <a href="resources.html">Resources</a> · <a href="about.html">About</a>
     </footer>
+
+    <script src="js/questions.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        (function () {
+            /* Daily challenge: one question per calendar day, same for everyone,
+               with a localStorage day-streak. */
+            const KEY = 'nmtc-daily-v1';
+            let saved = {};
+            try { saved = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { saved = {}; }
+
+            const today = new Date();
+            const dayStamp = today.getFullYear() + '-' +
+                String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                String(today.getDate()).padStart(2, '0');
+            const dayNumber = Math.floor(today.getTime() / 86400000);
+            const q = QUESTIONS[dayNumber % QUESTIONS.length];
+
+            document.getElementById('daily-level').textContent = LEVELS[q.level].name;
+            document.getElementById('daily-topic').textContent = q.topic;
+            document.getElementById('daily-q').innerHTML = q.q;
+
+            function renderStreak() {
+                document.getElementById('daily-streak-num').textContent = saved.streak || 0;
+            }
+            renderStreak();
+
+            const optWrap = document.getElementById('daily-options');
+            const doneEl = document.getElementById('daily-done');
+            const card = document.getElementById('daily-card');
+
+            function showSolved(right, chosen) {
+                optWrap.querySelectorAll('.option').forEach((b, i) => {
+                    b.disabled = true;
+                    if (i === q.answer) b.classList.add('correct');
+                    else if (i === chosen && !right) b.classList.add('wrong');
+                });
+                doneEl.innerHTML = '<div class="solution-box"><b>' +
+                    (right ? '✓ Solved! Come back tomorrow for the next one.' : '✗ Not quite — tomorrow is a fresh start.') +
+                    '</b> ' + q.solution + '</div>';
+            }
+
+            q.options.forEach((opt, oi) => {
+                const b = document.createElement('button');
+                b.className = 'option';
+                b.innerHTML = '<strong>' + String.fromCharCode(65 + oi) + '.</strong> ' + opt;
+                b.addEventListener('click', () => {
+                    const right = oi === q.answer;
+                    if (right) {
+                        // continue streak only if last solve was yesterday (or first ever)
+                        const yesterday = new Date(today.getTime() - 86400000);
+                        const yStamp = yesterday.getFullYear() + '-' +
+                            String(yesterday.getMonth() + 1).padStart(2, '0') + '-' +
+                            String(yesterday.getDate()).padStart(2, '0');
+                        saved.streak = (saved.lastSolved === yStamp) ? (saved.streak || 0) + 1 : 1;
+                        saved.lastSolved = dayStamp;
+                        sparkleBurst(card);
+                    }
+                    saved.lastTried = dayStamp;
+                    saved.lastResult = right;
+                    saved.lastChoice = oi;
+                    localStorage.setItem(KEY, JSON.stringify(saved));
+                    renderStreak();
+                    showSolved(right, oi);
+                });
+                optWrap.appendChild(b);
+            });
+
+            // Already attempted today? Show the outcome instead of letting them re-answer.
+            if (saved.lastTried === dayStamp) {
+                showSolved(saved.lastResult, saved.lastChoice);
+            }
+        })();
+    </script>
 </body>
 
 </html>

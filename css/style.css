@@ -458,3 +458,228 @@ table.info-table td:first-child { color: var(--text-primary); font-weight: 500; 
     .page-header h1 { font-size: 1.7rem; }
     .sticky-bar { top: 110px; }
 }
+
+/* ============ Engagement layer ============ */
+
+/* ---------- Entrance animation ---------- */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.reveal { opacity: 0; }
+.reveal.in { animation: fadeUp 0.55s ease forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; }
+    .reveal.in { animation: none; }
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* ---------- Difficulty badges ---------- */
+.badge.easy { background: rgba(16, 185, 129, 0.16); color: #6ee7b7; }
+.badge.medium { background: rgba(245, 158, 11, 0.16); color: #fcd34d; }
+.badge.hard { background: rgba(239, 68, 68, 0.16); color: #fca5a5; }
+
+/* ---------- Buttons & options: press feedback ---------- */
+.btn:active, .option:active:not(:disabled), .pill:active { transform: scale(0.97); }
+
+.option { position: relative; }
+
+@keyframes popCorrect {
+    0% { transform: scale(1); }
+    45% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+
+@keyframes shakeWrong {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.option.correct { animation: popCorrect 0.35s ease; }
+.option.wrong { animation: shakeWrong 0.3s ease; }
+
+/* ---------- Sparkle burst on correct answers ---------- */
+.sparkle {
+    position: absolute;
+    font-size: 1rem;
+    pointer-events: none;
+    animation: sparkleFly 0.8s ease-out forwards;
+    z-index: 5;
+}
+
+@keyframes sparkleFly {
+    from { opacity: 1; transform: translate(0, 0) scale(0.6); }
+    to { opacity: 0; transform: translate(var(--dx, 0), var(--dy, -60px)) scale(1.25); }
+}
+
+/* ---------- Streak chip ---------- */
+.streak-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(245, 158, 11, 0.14);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    color: #fcd34d;
+    font-weight: 600;
+    font-size: 0.88rem;
+}
+
+@keyframes streakPulse {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.25); }
+    100% { transform: scale(1); }
+}
+
+.streak-chip.bump { animation: streakPulse 0.4s ease; }
+
+/* ---------- Filter toolbar ---------- */
+.filter-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.filter-bar .spacer { flex: 1; }
+
+select.select {
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 0.88rem;
+    cursor: pointer;
+}
+
+select.select:focus { outline: none; border-color: var(--primary); }
+
+/* ---------- Question palette (mock test navigator) ---------- */
+.palette {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.palette button {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    border: 1px solid var(--border);
+    background: var(--bg-input);
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.palette button:hover { border-color: var(--primary); color: var(--text-primary); }
+
+.palette button.answered {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+
+/* ---------- Score ring ---------- */
+.ring-wrap {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 14px auto;
+}
+
+.ring-wrap svg { transform: rotate(-90deg); }
+
+.ring-track { fill: none; stroke: var(--bg-input); stroke-width: 11; }
+
+.ring-value {
+    fill: none;
+    stroke: var(--primary);
+    stroke-width: 11;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s ease;
+}
+
+.ring-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.ring-center .big { font-size: 1.9rem; font-weight: 700; color: var(--text-primary); line-height: 1.1; }
+.ring-center .small { font-size: 0.78rem; color: var(--text-muted); }
+
+/* ---------- Daily challenge ---------- */
+.daily-card {
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    background:
+        linear-gradient(135deg, rgba(245, 158, 11, 0.07) 0%, rgba(99, 102, 241, 0.06) 100%),
+        var(--bg-card);
+}
+
+.daily-card .daily-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.daily-card .daily-head h3 { margin: 0; }
+
+/* ---------- Floating hero symbols ---------- */
+.hero { position: relative; }
+
+.float-sym {
+    position: absolute;
+    font-size: 1.6rem;
+    color: var(--primary-light);
+    opacity: 0.22;
+    pointer-events: none;
+    user-select: none;
+    animation: symFloat 7s ease-in-out infinite;
+    font-family: 'Cambria Math', Cambria, Georgia, serif;
+}
+
+@keyframes symFloat {
+    0%, 100% { transform: translateY(0) rotate(-6deg); }
+    50% { transform: translateY(-16px) rotate(6deg); }
+}
+
+@media (max-width: 640px) {
+    .float-sym { display: none; }
+}
+
+/* ---------- Practice progress line ---------- */
+.practice-progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.practice-progress .progress-track { flex: 1; }
+.practice-progress .count { font-size: 0.85rem; color: var(--text-secondary); white-space: nowrap; }
+
+/* ---------- Empty state ---------- */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+}
+
+.empty-state .glyph { font-size: 2.4rem; display: block; margin-bottom: 10px; }

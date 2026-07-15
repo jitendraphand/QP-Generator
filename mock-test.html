@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timed Mock Test — NMTC Prep</title>
     <meta name="description"
-        content="Take a timed NMTC-style mock test: 10 random questions, a 30-minute countdown, instant scoring and full answer review.">
+        content="Take a timed NMTC-style mock test: 10 random questions, a 30-minute countdown, a question palette, instant scoring and full answer review.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27 fill=%27%23a5b4fc%27>π</text></svg>">
@@ -35,7 +35,7 @@
         <div class="page-header">
             <h1>Timed Mock Test</h1>
             <p>10 random questions from your chosen level · 30 minutes · auto-submits when time runs out.
-                No solutions are shown until you finish — just like the real thing.</p>
+                No solutions until you finish — just like the real thing.</p>
         </div>
 
         <!-- Setup screen -->
@@ -46,17 +46,21 @@
                 <button class="btn btn-primary" id="start-btn">Start Test ▶</button>
                 <p style="margin-top: 14px; font-size: 0.85rem; color: var(--text-muted);">
                     The timer starts immediately. Answers can be changed until you submit.</p>
+                <p id="best-score-line" style="margin-top: 6px; font-size: 0.85rem; color: var(--accent);"></p>
             </div>
         </div>
 
         <!-- Test screen -->
         <div id="test-screen" style="display:none;">
-            <div class="sticky-bar">
-                <div class="timer" id="timer">30:00</div>
-                <div style="color: var(--text-secondary); font-size: 0.9rem;">
-                    Answered: <strong id="answered-count" style="color: var(--primary-light);">0 / 10</strong>
+            <div class="sticky-bar" style="flex-direction: column; align-items: stretch; gap: 10px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;">
+                    <div class="timer" id="timer">30:00</div>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                        Answered: <strong id="answered-count" style="color: var(--primary-light);">0 / 10</strong>
+                    </div>
+                    <button class="btn btn-primary btn-sm" id="submit-btn">Submit Test</button>
                 </div>
-                <button class="btn btn-primary btn-sm" id="submit-btn">Submit Test</button>
+                <div class="palette" id="palette" aria-label="Question navigator"></div>
             </div>
             <div id="test-questions"></div>
         </div>
@@ -65,9 +69,19 @@
         <div id="result-screen" style="display:none;">
             <div class="card" style="text-align:center;">
                 <h3 id="result-heading">Your Result</h3>
-                <div class="score-big" id="result-score"></div>
+                <div class="ring-wrap">
+                    <svg width="150" height="150" viewBox="0 0 150 150" aria-hidden="true">
+                        <circle class="ring-track" cx="75" cy="75" r="64"></circle>
+                        <circle class="ring-value" id="ring-value" cx="75" cy="75" r="64"></circle>
+                    </svg>
+                    <div class="ring-center">
+                        <span class="big" id="result-score">0/10</span>
+                        <span class="small" id="result-pct"></span>
+                    </div>
+                </div>
                 <p id="result-message" style="margin-bottom: 8px;"></p>
                 <p style="font-size: 0.85rem; color: var(--text-muted);" id="result-time"></p>
+                <p style="font-size: 0.85rem; color: var(--accent);" id="result-best"></p>
                 <div style="margin-top: 18px;">
                     <button class="btn btn-primary" id="retry-btn">Take Another Test</button>
                 </div>
@@ -83,10 +97,13 @@
     </footer>
 
     <script src="js/questions.js"></script>
+    <script src="js/ui.js"></script>
     <script>
         (function () {
             const NUM_QUESTIONS = 10;
             const DURATION_SECONDS = 30 * 60;
+            const BEST_KEY = 'nmtc-mock-best-v1';
+            const RING_CIRC = 2 * Math.PI * 64;
 
             const setupScreen = document.getElementById('setup-screen');
             const testScreen = document.getElementById('test-screen');
@@ -94,6 +111,7 @@
             const pillRow = document.getElementById('level-pills');
             const timerEl = document.getElementById('timer');
             const answeredEl = document.getElementById('answered-count');
+            const paletteEl = document.getElementById('palette');
 
             let level = 'primary';
             let testQs = [];
@@ -101,18 +119,29 @@
             let timerId = null;
             let remaining = DURATION_SECONDS;
 
+            let bestScores = {};
+            try { bestScores = JSON.parse(localStorage.getItem(BEST_KEY)) || {}; } catch (e) { bestScores = {}; }
+
+            function showBestLine() {
+                const b = bestScores[level];
+                document.getElementById('best-score-line').textContent =
+                    b !== undefined ? '🏅 Your best at this level: ' + b + ' / ' + NUM_QUESTIONS : '';
+            }
+
             Object.entries(LEVELS).forEach(([key, meta], i) => {
                 const btn = document.createElement('button');
                 btn.className = 'pill' + (i === 0 ? ' active' : '');
-                btn.textContent = meta.name;
+                btn.textContent = meta.icon + ' ' + meta.name;
                 btn.dataset.level = key;
                 btn.addEventListener('click', () => {
                     level = key;
                     pillRow.querySelectorAll('.pill').forEach(p =>
                         p.classList.toggle('active', p.dataset.level === key));
+                    showBestLine();
                 });
                 pillRow.appendChild(btn);
             });
+            showBestLine();
 
             function shuffle(arr) {
                 const a = arr.slice();
@@ -138,6 +167,7 @@
                 resultScreen.style.display = 'none';
                 testScreen.style.display = '';
                 renderTest();
+                renderPalette();
                 updateAnswered();
 
                 timerEl.classList.remove('warning');
@@ -151,14 +181,30 @@
                 window.scrollTo(0, 0);
             }
 
+            function renderPalette() {
+                paletteEl.innerHTML = '';
+                testQs.forEach((q, i) => {
+                    const b = document.createElement('button');
+                    b.textContent = i + 1;
+                    b.title = 'Go to question ' + (i + 1);
+                    b.addEventListener('click', () => {
+                        const card = document.querySelector('[data-qcard="' + i + '"]');
+                        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    });
+                    paletteEl.appendChild(b);
+                });
+            }
+
             function renderTest() {
                 const wrap = document.getElementById('test-questions');
                 wrap.innerHTML = '';
                 testQs.forEach((q, idx) => {
                     const card = document.createElement('div');
                     card.className = 'card question-card';
+                    card.dataset.qcard = idx;
                     card.innerHTML = '<div class="q-meta"><span class="q-number">Q' + (idx + 1) +
-                        '</span><span class="badge topic">' + q.topic + '</span></div>' +
+                        '</span><span class="badge topic">' + q.topic + '</span>' +
+                        '<span class="badge ' + q.diff + '">' + q.diff + '</span></div>' +
                         '<div class="q-text">' + q.q + '</div>';
                     const optWrap = document.createElement('div');
                     optWrap.className = 'options';
@@ -177,11 +223,14 @@
                     card.appendChild(optWrap);
                     wrap.appendChild(card);
                 });
+                revealAll();
             }
 
             function updateAnswered() {
                 const n = answers.filter(a => a !== null).length;
                 answeredEl.textContent = n + ' / ' + testQs.length;
+                paletteEl.querySelectorAll('button').forEach((b, i) =>
+                    b.classList.toggle('answered', answers[i] !== null));
             }
 
             function finishTest(auto) {
@@ -192,9 +241,17 @@
                 const score = testQs.reduce((s, q, i) => s + (answers[i] === q.answer ? 1 : 0), 0);
                 const pct = Math.round(100 * score / testQs.length);
 
+                const prevBest = bestScores[level];
+                const isRecord = prevBest === undefined || score > prevBest;
+                if (isRecord) {
+                    bestScores[level] = score;
+                    localStorage.setItem(BEST_KEY, JSON.stringify(bestScores));
+                }
+
                 document.getElementById('result-heading').textContent =
                     auto ? "Time's up — auto-submitted" : 'Your Result';
-                document.getElementById('result-score').textContent = score + ' / ' + testQs.length;
+                document.getElementById('result-score').textContent = score + '/' + testQs.length;
+                document.getElementById('result-pct').textContent = pct + '%';
                 document.getElementById('result-message').textContent =
                     pct >= 80 ? '🏆 Outstanding! You are in great shape for the NMTC.' :
                     pct >= 60 ? '💪 Good work — review the ones you missed and try again.' :
@@ -203,6 +260,18 @@
                 document.getElementById('result-time').textContent =
                     'Time used: ' + fmt(DURATION_SECONDS - Math.max(remaining, 0)) +
                     ' · Level: ' + LEVELS[level].name;
+                document.getElementById('result-best').textContent =
+                    isRecord && prevBest !== undefined ? '🎉 New personal best (previous: ' + prevBest + ')!' :
+                    isRecord ? '' : '🏅 Personal best at this level: ' + prevBest + ' / ' + testQs.length;
+
+                // Animate the score ring
+                const ring = document.getElementById('ring-value');
+                ring.style.strokeDasharray = RING_CIRC;
+                ring.style.strokeDashoffset = RING_CIRC;
+                requestAnimationFrame(() =>
+                    requestAnimationFrame(() => {
+                        ring.style.strokeDashoffset = RING_CIRC * (1 - pct / 100);
+                    }));
 
                 const review = document.getElementById('review-list');
                 review.innerHTML = '';
@@ -214,6 +283,7 @@
                     card.innerHTML =
                         '<div class="q-meta"><span class="q-number">Q' + (idx + 1) + '</span>' +
                         '<span class="badge topic">' + q.topic + '</span>' +
+                        '<span class="badge ' + q.diff + '">' + q.diff + '</span>' +
                         '<span class="badge" style="background:' +
                         (right ? 'rgba(16,185,129,0.18); color:#6ee7b7' :
                             'rgba(239,68,68,0.18); color:#fca5a5') + '">' +
@@ -226,6 +296,7 @@
                         '<div class="solution-box"><b>Solution.</b> ' + q.solution + '</div>';
                     review.appendChild(card);
                 });
+                revealAll();
                 window.scrollTo(0, 0);
             }
 
@@ -234,6 +305,7 @@
             document.getElementById('retry-btn').addEventListener('click', () => {
                 resultScreen.style.display = 'none';
                 setupScreen.style.display = '';
+                showBestLine();
                 window.scrollTo(0, 0);
             });
         })();

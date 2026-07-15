@@ -10,10 +10,10 @@ Talent Contest)** conducted by the AMTI (Association of Mathematics Teachers of 
 
 | Page | What it does |
 | --- | --- |
-| `index.html` | Home — overview and links to every tool |
+| `index.html` | Home — overview, animated stats, a Daily Challenge question and links to every tool |
 | `about.html` | What NMTC is: contest levels (Gauss → Aryabhata), the two stages, eligibility |
 | `syllabus.html` | Level-wise topic map compiled from the style of past papers |
-| `practice.html` | Interactive practice: 48 olympiad-style questions with instant feedback and full solutions |
+| `practice.html` | Interactive practice: 100 olympiad-style questions (25 per level, tagged easy/medium/hard) with instant feedback and full solutions |
 | `mock-test.html` | Timed mock test — 10 random questions, 30-minute countdown, score card and answer review |
 | `formulas.html` | Quick-revision sheets: number theory, algebra, geometry, combinatorics, contest tactics |
 | `planner.html` | 8-week study plan with a progress tracker (saved in `localStorage`) |
